@@ -1,0 +1,43 @@
+
+name: Brownie
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  
+concurrency:
+  group: auto-commit
+  cancel-in-progress: true
+  
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Chillin with some work
+        run: |
+          FILES=("chilling.md" "floates.md" "breads.md")
+          MESSAGES=("learned something new" "worked on project" "improved code" "fixed bug" "daily progress")
+
+          FILE=${FILES[$RANDOM % ${#FILES[@]}]}
+          MSG=${MESSAGES[$RANDOM % ${#MESSAGES[@]}]}
+
+          echo "- $(date): practiced ChillOps and CC/CD" >> $FILE
+
+      - name: Commit
+        run: |
+          git config --global user.name "acerijan"
+          git config --global user.email "rijandai147@gmail.com"
+          git add .
+          git commit -m "$MSG $(date)" || echo "no changes"
+
+      - name: Push
+        run: |
+          git pull --rebase origin main
+          git push
